@@ -1,4 +1,4 @@
-# 📚 Multimodal Chat with PDFs – Text + Image Understanding
+# 📚 Multimodal Chat with PDFs - Text + Image Understanding
 
 Upload a PDF (reports, research papers, scanned docs, manuals) and **chat with it**.  
 Unlike most RAG apps, this one is **multimodal**: it understands both the **text** and the **images/figures/tables** inside the document.  
