@@ -55,8 +55,8 @@ Upload PDFs, ask questions, and get contextual answers with support for text, im
 ### 🚀 Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/multimodal-pdf-chat-mvp.git
-cd multimodal-pdf-chat-mvp
+git clone https://github.com/kritidutta01/multimodal-chat-with-pdf.git
+cd multimodal-chat-with-pdf
 
 # Install dependencies
 pip install -r requirements.txt
