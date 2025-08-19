@@ -8,7 +8,7 @@
 
 *A proof-of-concept application that enables intelligent conversations with PDF documents using multimodal AI capabilities.*
 
-[Demo](#-usage) • [Installation](#-installation) • [Features](#-features) • [Contributing](#-contributing)
+[Demo](#-usage) • [Installation](#-installation) • [Features](#-features) 
 
 </div>
 
