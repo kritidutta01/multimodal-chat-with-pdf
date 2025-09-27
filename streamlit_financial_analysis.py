@@ -20,7 +20,7 @@ warnings.filterwarnings('ignore')
 
 # Page Configuration
 st.set_page_config(
-    page_title="🇮🇳 Indian Financial PDF Chat - Phase 2",
+    page_title="Indian Financial PDF Chat - Phase 2",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
