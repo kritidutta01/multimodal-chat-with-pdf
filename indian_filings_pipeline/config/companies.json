@@ -1,0 +1,254 @@
+{
+  "companies": [
+    {
+      "symbol": "RELIANCE",
+      "name": "Reliance Industries Limited",
+      "sector": "Oil & Gas",
+      "exchange": "NSE",
+      "bse_code": "500325",
+      "nse_symbol": "RELIANCE",
+      "website": "https://www.ril.com",
+      "ir_page": "https://www.ril.com/InvestorRelations.aspx"
+    },
+    {
+      "symbol": "TCS",
+      "name": "Tata Consultancy Services Limited",
+      "sector": "IT",
+      "exchange": "NSE",
+      "bse_code": "532540",
+      "nse_symbol": "TCS",
+      "website": "https://www.tcs.com",
+      "ir_page": "https://www.tcs.com/investor-relations"
+    },
+    {
+      "symbol": "HDFCBANK",
+      "name": "HDFC Bank Limited",
+      "sector": "Banking",
+      "exchange": "NSE",
+      "bse_code": "500180",
+      "nse_symbol": "HDFCBANK",
+      "website": "https://www.hdfcbank.com",
+      "ir_page": "https://www.hdfcbank.com/personal/about-us/investor-relations"
+    },
+    {
+      "symbol": "INFY",
+      "name": "Infosys Limited",
+      "sector": "IT",
+      "exchange": "NSE",
+      "bse_code": "500209",
+      "nse_symbol": "INFY",
+      "website": "https://www.infosys.com",
+      "ir_page": "https://www.infosys.com/investors.html"
+    },
+    {
+      "symbol": "ICICIBANK",
+      "name": "ICICI Bank Limited",
+      "sector": "Banking",
+      "exchange": "NSE",
+      "bse_code": "532174",
+      "nse_symbol": "ICICIBANK",
+      "website": "https://www.icicibank.com",
+      "ir_page": "https://www.icicibank.com/aboutus/investor-relation"
+    },
+    {
+      "symbol": "HINDUNILVR",
+      "name": "Hindustan Unilever Limited",
+      "sector": "FMCG",
+      "exchange": "NSE",
+      "bse_code": "500696",
+      "nse_symbol": "HINDUNILVR",
+      "website": "https://www.hul.co.in",
+      "ir_page": "https://www.hul.co.in/investor-relations/"
+    },
+    {
+      "symbol": "ITC",
+      "name": "ITC Limited",
+      "sector": "FMCG",
+      "exchange": "NSE",
+      "bse_code": "500875",
+      "nse_symbol": "ITC",
+      "website": "https://www.itcportal.com",
+      "ir_page": "https://www.itcportal.com/about-itc/shareholder-value.aspx"
+    },
+    {
+      "symbol": "KOTAKBANK",
+      "name": "Kotak Mahindra Bank Limited",
+      "sector": "Banking",
+      "exchange": "NSE",
+      "bse_code": "500247",
+      "nse_symbol": "KOTAKBANK",
+      "website": "https://www.kotak.com",
+      "ir_page": "https://www.kotak.com/en/investor-relations.html"
+    },
+    {
+      "symbol": "SBIN",
+      "name": "State Bank of India",
+      "sector": "Banking",
+      "exchange": "NSE",
+      "bse_code": "500112",
+      "nse_symbol": "SBIN",
+      "website": "https://sbi.co.in",
+      "ir_page": "https://sbi.co.in/web/investor-relations"
+    },
+    {
+      "symbol": "BHARTIARTL",
+      "name": "Bharti Airtel Limited",
+      "sector": "Telecom",
+      "exchange": "NSE",
+      "bse_code": "532454",
+      "nse_symbol": "BHARTIARTL",
+      "website": "https://www.airtel.in",
+      "ir_page": "https://www.airtel.in/about-bharti/equity/investor-relation"
+    },
+    {
+      "symbol": "ASIANPAINT",
+      "name": "Asian Paints Limited",
+      "sector": "Paints",
+      "exchange": "NSE",
+      "bse_code": "500820",
+      "nse_symbol": "ASIANPAINT",
+      "website": "https://www.asianpaints.com",
+      "ir_page": "https://www.asianpaints.com/investor-relations.html"
+    },
+    {
+      "symbol": "MARUTI",
+      "name": "Maruti Suzuki India Limited",
+      "sector": "Auto",
+      "exchange": "NSE",
+      "bse_code": "532500",
+      "nse_symbol": "MARUTI",
+      "website": "https://www.marutisuzuki.com",
+      "ir_page": "https://www.marutisuzuki.com/corporate/investor"
+    },
+    {
+      "symbol": "AXISBANK",
+      "name": "Axis Bank Limited",
+      "sector": "Banking",
+      "exchange": "NSE",
+      "bse_code": "532215",
+      "nse_symbol": "AXISBANK",
+      "website": "https://www.axisbank.com",
+      "ir_page": "https://www.axisbank.com/shareholders-corner"
+    },
+    {
+      "symbol": "LT",
+      "name": "Larsen & Toubro Limited",
+      "sector": "Engineering",
+      "exchange": "NSE",
+      "bse_code": "500510",
+      "nse_symbol": "LT",
+      "website": "https://www.larsentoubro.com",
+      "ir_page": "https://www.larsentoubro.com/corporate/investor-relations/"
+    },
+    {
+      "symbol": "SUNPHARMA",
+      "name": "Sun Pharmaceutical Industries Limited",
+      "sector": "Pharma",
+      "exchange": "NSE",
+      "bse_code": "524715",
+      "nse_symbol": "SUNPHARMA",
+      "website": "https://www.sunpharma.com",
+      "ir_page": "https://www.sunpharma.com/investor-relations"
+    },
+    {
+      "symbol": "TATAMOTORS",
+      "name": "Tata Motors Limited",
+      "sector": "Auto",
+      "exchange": "NSE",
+      "bse_code": "500570",
+      "nse_symbol": "TATAMOTORS",
+      "website": "https://www.tatamotors.com",
+      "ir_page": "https://www.tatamotors.com/investors/"
+    },
+    {
+      "symbol": "NESTLEIND",
+      "name": "Nestle India Limited",
+      "sector": "FMCG",
+      "exchange": "NSE",
+      "bse_code": "500790",
+      "nse_symbol": "NESTLEIND",
+      "website": "https://www.nestle.in",
+      "ir_page": "https://www.nestle.in/investors"
+    },
+    {
+      "symbol": "WIPRO",
+      "name": "Wipro Limited",
+      "sector": "IT",
+      "exchange": "NSE",
+      "bse_code": "507685",
+      "nse_symbol": "WIPRO",
+      "website": "https://www.wipro.com",
+      "ir_page": "https://www.wipro.com/investors/"
+    },
+    {
+      "symbol": "ULTRACEMCO",
+      "name": "UltraTech Cement Limited",
+      "sector": "Cement",
+      "exchange": "NSE",
+      "bse_code": "532538",
+      "nse_symbol": "ULTRACEMCO",
+      "website": "https://www.ultratechcement.com",
+      "ir_page": "https://www.ultratechcement.com/investors"
+    },
+    {
+      "symbol": "HCLTECH",
+      "name": "HCL Technologies Limited",
+      "sector": "IT",
+      "exchange": "NSE",
+      "bse_code": "532281",
+      "nse_symbol": "HCLTECH",
+      "website": "https://www.hcltech.com",
+      "ir_page": "https://www.hcltech.com/investors"
+    },
+    {
+      "symbol": "POWERGRID",
+      "name": "Power Grid Corporation of India Limited",
+      "sector": "Power",
+      "exchange": "NSE",
+      "bse_code": "532898",
+      "nse_symbol": "POWERGRID",
+      "website": "https://www.powergridindia.com",
+      "ir_page": "https://www.powergridindia.com/investor-relations"
+    },
+    {
+      "symbol": "BAJFINANCE",
+      "name": "Bajaj Finance Limited",
+      "sector": "NBFC",
+      "exchange": "NSE",
+      "bse_code": "500034",
+      "nse_symbol": "BAJFINANCE",
+      "website": "https://www.bajajfinserv.in",
+      "ir_page": "https://www.bajajfinserv.in/investor-relations"
+    },
+    {
+      "symbol": "NTPC",
+      "name": "NTPC Limited",
+      "sector": "Power",
+      "exchange": "NSE",
+      "bse_code": "532555",
+      "nse_symbol": "NTPC",
+      "website": "https://www.ntpc.co.in",
+      "ir_page": "https://www.ntpc.co.in/en/investors"
+    },
+    {
+      "symbol": "COALINDIA",
+      "name": "Coal India Limited",
+      "sector": "Mining",
+      "exchange": "NSE",
+      "bse_code": "533278",
+      "nse_symbol": "COALINDIA",
+      "website": "https://www.coalindia.in",
+      "ir_page": "https://www.coalindia.in/company/investor-relation/"
+    },
+    {
+      "symbol": "ADANIGREEN",
+      "name": "Adani Green Energy Limited",
+      "sector": "Power",
+      "exchange": "NSE",
+      "bse_code": "541450",
+      "nse_symbol": "ADANIGREEN",
+      "website": "https://www.adanigreenenergy.com",
+      "ir_page": "https://www.adanigreenenergy.com/investors"
+    }
+  ]
+}

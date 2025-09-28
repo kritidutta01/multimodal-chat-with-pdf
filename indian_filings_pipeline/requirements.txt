@@ -1,0 +1,39 @@
+# Core dependencies
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+urllib3==2.0.4
+
+# Database (SQLite - built into Python)
+sqlalchemy==2.0.21
+alembic==1.12.0
+
+# File handling
+PyMuPDF==1.23.8
+python-magic==0.4.27
+
+# Configuration and environment
+python-dotenv==1.0.0
+pydantic==2.4.2
+pydantic-settings==2.0.3
+
+# Scheduling (for later weeks)
+APScheduler==3.10.4
+
+# Utilities
+tqdm==4.66.1
+python-slugify==8.0.1
+validators==0.22.0
+
+# Logging and monitoring
+structlog==23.1.0
+
+# Development and testing
+pytest==7.4.2
+pytest-cov==4.1.0
+black==23.9.1
+flake8==6.1.0
+
+# Web framework (for API in later weeks)
+flask==2.3.3
+flask-sqlalchemy==3.0.5

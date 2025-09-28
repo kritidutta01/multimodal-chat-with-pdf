@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Main Pipeline Application
+  pipeline:
+    build: .
+    container_name: indian_filings_pipeline
+    environment:
+      DATABASE_URL: sqlite:///data/indian_filings.db
+      LOG_LEVEL: INFO
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./logs:/app/data/logs
+    networks:
+      - pipeline_network
+    command: ["python", "scripts/setup_database.py"]
+
+  # Redis (for future use with Celery)
+  redis:
+    image: redis:7-alpine
+    container_name: indian_filings_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - pipeline_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Jupyter Notebook for development and analysis
+  jupyter:
+    build: .
+    container_name: indian_filings_jupyter
+    environment:
+      DATABASE_URL: sqlite:///data/indian_filings.db
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./:/app
+      - ./notebooks:/app/notebooks
+    networks:
+      - pipeline_network
+    command: >
+      bash -c "pip install jupyter pandas matplotlib seaborn &&
+               jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''"
+
+  # SQLite Browser (web-based SQLite management)
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: indian_filings_sqlite_web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
+    command: ["sqlite_web", "/data/indian_filings.db", "--host", "0.0.0.0", "--port", "8080"]
+    networks:
+      - pipeline_network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  pipeline_network:
+    driver: bridge
