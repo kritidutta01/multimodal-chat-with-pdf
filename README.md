@@ -8,7 +8,7 @@
 
 *A proof-of-concept application that enables intelligent conversations with PDF documents using multimodal AI capabilities.*
 
-[Demo](#-usage) • [Installation](#-installation) • [Features](#-features) 
+[Demo](https://multimodal-chat-with-pdf-v2.streamlit.app/) • [Installation](#-installation) • [Features](#-features) 
 
 </div>
 
