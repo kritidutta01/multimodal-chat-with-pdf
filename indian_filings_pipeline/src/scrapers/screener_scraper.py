@@ -9,7 +9,7 @@ from urllib.parse import urljoin, quote
 
 from .base_scraper import BaseScraper
 from src.database.models import Company
-from src.utils.helpers import extract_year_from_text, classify_document_type, normalize_company_name
+from src.utils.helpers import extract_year_from_text, classify_document_type
 from config.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -85,7 +85,7 @@ class ScreenerScraper(BaseScraper):
         return documents
     
     def _find_company_url(self, company: Company) -> Optional[str]:
-        """Find the company URL on screener.in"""
+        """Find the company URL on screener.in by searching with company name"""
         try:
             # Get company attributes safely
             try:
@@ -94,54 +94,78 @@ class ScreenerScraper(BaseScraper):
             except Exception as e:
                 logger.error(f"Unable to access company attributes: {e}")
                 return None
-            
-            # Try different search terms
-            search_terms = [
-                company_symbol,
-                company_name,
-                normalize_company_name(company_name)
+
+            logger.info(f"Searching for company: {company_name} ({company_symbol})")
+
+            # Screener.in URLs follow the pattern: /company/{company-name-slug}/
+            # Example: https://www.screener.in/company/RELIANCE/consolidated/
+
+            # Try direct URL construction with company symbol first
+            # Most companies use their stock symbol as the URL slug
+            direct_urls = [
+                f"{self.company_url}/{company_symbol}/consolidated/",
+                f"{self.company_url}/{company_symbol}/",
+                f"{self.company_url}/{company_symbol.upper()}/",
             ]
-            
-            for search_term in search_terms:
-                # Search using screener.in search API
-                search_url = f"{self.search_url}?q={quote(search_term)}"
-                response = self.make_request(search_url)
-                
-                if response:
-                    try:
-                        search_results = response.json()
-                        
-                        # Look for exact or close matches
-                        for result in search_results:
-                            result_name = result.get('name', '').lower()
-                            result_symbol = result.get('symbol', '').lower()
-                            
-                            # Check for symbol match
-                            if company_symbol.lower() == result_symbol:
-                                company_id = result.get('id')
-                                return f"{self.company_url}/{company_id}/"
-                            
-                            # Check for name match
-                            normalized_result = normalize_company_name(result_name)
-                            normalized_search = normalize_company_name(company_name)
-                            
-                            if normalized_result == normalized_search:
-                                company_id = result.get('id')
-                                return f"{self.company_url}/{company_id}/"
-                    
-                    except Exception as e:
-                        logger.debug(f"Error parsing search results: {e}")
-                        continue
-            
-            # If API search fails, try direct URL construction
-            # Many companies follow the pattern: /company/{symbol}/
-            direct_url = f"{self.company_url}/{company_symbol.lower()}/"
-            response = self.make_request(direct_url)
+
+            for url in direct_urls:
+                logger.debug(f"Trying URL: {url}")
+                response = self.make_request(url)
+                if response and response.status_code == 200:
+                    logger.info(f"Found company page: {url}")
+                    return url
+
+            # If direct URL fails, try creating slug from company name
+            # Convert company name to URL-friendly slug (lowercase, spaces to hyphens)
+            name_slug = company_name.lower()
+            # Remove common suffixes
+            name_slug = re.sub(r'\s+(ltd|limited|inc|corp|corporation)\.?$', '', name_slug, flags=re.I)
+            # Replace spaces and special characters with hyphens
+            name_slug = re.sub(r'[^a-z0-9]+', '-', name_slug)
+            # Remove leading/trailing hyphens
+            name_slug = name_slug.strip('-')
+
+            name_urls = [
+                f"{self.company_url}/{name_slug}/consolidated/",
+                f"{self.company_url}/{name_slug}/",
+            ]
+
+            for url in name_urls:
+                logger.debug(f"Trying URL: {url}")
+                response = self.make_request(url)
+                if response and response.status_code == 200:
+                    logger.info(f"Found company page: {url}")
+                    return url
+
+            # Last resort: Use search page
+            # Screener.in has a search page that works with company names
+            search_page_url = f"{self.base_url}/screen/raw/?q={quote(company_name)}"
+            logger.debug(f"Trying search page: {search_page_url}")
+            response = self.make_request(search_page_url)
+
             if response and response.status_code == 200:
-                return direct_url
-            
+                soup = self.parse_html(response)
+                if soup:
+                    # Look for company links in search results
+                    # Usually in format: <a href="/company/SYMBOL/">Company Name</a>
+                    company_links = soup.find_all('a', href=re.compile(r'/company/[^/]+/?'))
+
+                    for link in company_links:
+                        link_text = link.get_text(strip=True).lower()
+                        link_href = link.get('href')
+
+                        # Check if link text matches company name or symbol
+                        if (company_name.lower() in link_text or
+                            company_symbol.lower() in link_text or
+                            link_text in company_name.lower()):
+
+                            full_url = urljoin(self.base_url, link_href)
+                            logger.info(f"Found company page via search: {full_url}")
+                            return full_url
+
+            logger.warning(f"Could not find company page for {company_name} ({company_symbol})")
             return None
-            
+
         except Exception as e:
             logger.error(f"Error finding company URL: {e}")
             return None
@@ -197,17 +221,48 @@ class ScreenerScraper(BaseScraper):
     def _get_annual_reports(self, company_url: str, company: Company) -> List[Dict]:
         """Get annual reports from company page"""
         documents = []
-        import pdb;pdb.set_trace()
+
         try:
-            # Try to access annual reports section
-            annual_url = f"{company_url}annual-reports/"
-            response = self.make_request(annual_url)
-            
-            if response and response.status_code == 200:
-                soup = self.parse_html(response)
-                if soup:
-                    # Parse annual reports table/list
-                    documents.extend(self._parse_reports_page(soup, company_url, company, 'annual_report'))
+            # Screener.in annual reports are typically on the main company page
+            # Look for the documents section on the company page
+            response = self.make_request(company_url)
+            if not response:
+                return documents
+
+            soup = self.parse_html(response)
+            if not soup:
+                return documents
+
+            # Find the annual reports section - usually in a section with id or class containing 'annual'
+            annual_section = soup.find(['section', 'div'],
+                                      attrs={'id': re.compile(r'annual|report', re.I)}) or \
+                           soup.find(['section', 'div'],
+                                      class_=re.compile(r'annual|report', re.I))
+
+            if annual_section:
+                # Look for links in this section
+                links = annual_section.find_all('a', href=True)
+                for link in links:
+                    href = link.get('href')
+                    text = link.get_text(strip=True)
+
+                    # Check if it's a PDF link (annual reports are usually PDFs)
+                    if href and (href.endswith('.pdf') or 'annual' in text.lower()):
+                        doc_info = self._parse_document_link(href, text, company_url, company, 'annual_report')
+                        if doc_info:
+                            documents.append(doc_info)
+
+            # Also look for any links with "annual report" text anywhere on the page
+            all_links = soup.find_all('a', href=True)
+            for link in all_links:
+                href = link.get('href')
+                text = link.get_text(strip=True).lower()
+
+                # Look for annual report keywords
+                if 'annual report' in text or 'annual-report' in href.lower():
+                    doc_info = self._parse_document_link(href, link.get_text(strip=True), company_url, company, 'annual_report')
+                    if doc_info and doc_info not in documents:
+                        documents.append(doc_info)
             
         except Exception as e:
             logger.debug(f"Error getting annual reports: {e}")
@@ -309,7 +364,7 @@ class ScreenerScraper(BaseScraper):
         
         return False
     
-    def _parse_document_link(self, href: str, text: str, company_url: str, 
+    def _parse_document_link(self, href: str, text: str, company_url: str,
                             company: Company, default_doc_type: str = None) -> Optional[Dict]:
         """Parse a document link and extract information"""
         try:
@@ -320,31 +375,45 @@ class ScreenerScraper(BaseScraper):
                 url = href
             else:
                 url = urljoin(company_url, href)
-            
+
+            # Combine text and URL for better pattern matching
+            combined_text = f"{text} {href}"
+
             # Classify document type
-            combined_text = f"{text} {href}".lower()
-            doc_type = classify_document_type(combined_text, self.doc_patterns)
-            
+            doc_type = classify_document_type(combined_text.lower(), self.doc_patterns)
+
             # Use default type if classification fails
             if doc_type == 'other' and default_doc_type:
                 doc_type = default_doc_type
-            
-            # Extract year and period information
-            year = extract_year_from_text(combined_text)
+
+            # Extract year from multiple sources (prioritize URL, then text)
+            year = extract_year_from_text(href)  # Try URL first
+            if not year:
+                year = extract_year_from_text(text)  # Try text second
+            if not year:
+                year = extract_year_from_text(combined_text)  # Try combined
+
+            # Extract quarter information
             quarter = self._extract_quarter(combined_text)
-            
+
             # Generate period string
             period = None
             if quarter and year:
                 period = f"{quarter}FY{year}"
             elif year:
                 period = f"FY{year}"
-            
-            # Clean up title
+
+            # Clean up title - remove redundant info
             title = text.strip()
-            if not title:
-                title = f"Screener.in Document - {doc_type}"
-            
+            if not title or len(title) < 3:
+                # Generate descriptive title if missing
+                if year and doc_type:
+                    title = f"{doc_type.replace('_', ' ').title()} FY{year}"
+                else:
+                    title = f"Document - {doc_type}"
+
+            logger.debug(f"Parsed document: {title} | Year: {year} | Type: {doc_type} | URL: {url}")
+
             return {
                 'title': title,
                 'url': url,
@@ -360,9 +429,9 @@ class ScreenerScraper(BaseScraper):
                     'company_url': company_url
                 }
             }
-            
+
         except Exception as e:
-            logger.debug(f"Error parsing document link: {e}")
+            logger.error(f"Error parsing document link: {e}")
             return None
     
     def _extract_quarter(self, text: str) -> Optional[str]:

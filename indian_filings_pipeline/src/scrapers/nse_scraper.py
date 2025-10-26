@@ -16,16 +16,19 @@ logger = logging.getLogger(__name__)
 
 class NSEScraper(BaseScraper):
     """Scraper for NSE India website"""
-    
+
     def __init__(self):
         super().__init__("nse_scraper")
         self.base_url = settings.NSE_BASE_URL
-        
+
         # NSE specific URL patterns
         self.company_info_url = f"{self.base_url}/api/quote-equity"
         self.corporate_actions_url = f"{self.base_url}/api/corporates-corporateActions"
         self.financial_results_url = f"{self.base_url}/api/corporates-financial-results"
-        
+
+        # Initialize session with NSE-specific headers and cookies
+        self._initialize_nse_session()
+
         # Document type patterns for NSE
         self.doc_patterns = {
             'annual_report': ['annual report', 'annual', 'yearly report'],
@@ -35,7 +38,36 @@ class NSEScraper(BaseScraper):
             'shareholding': ['shareholding pattern', 'shareholding', 'shares'],
             'other': ['notice', 'announcement', 'disclosure']
         }
-    
+
+    def _initialize_nse_session(self):
+        """Initialize NSE session with proper headers and cookies"""
+        try:
+            # Update headers for NSE
+            self.session.headers.update({
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'application/json, text/plain, */*',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Referer': 'https://www.nseindia.com/',
+                'Origin': 'https://www.nseindia.com',
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'empty',
+                'Sec-Fetch-Mode': 'cors',
+                'Sec-Fetch-Site': 'same-origin',
+            })
+
+            # Visit homepage to get cookies
+            logger.info("Initializing NSE session...")
+            response = self.session.get(
+                self.base_url,
+                timeout=self.timeout
+            )
+            response.raise_for_status()
+            logger.info("NSE session initialized successfully")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize NSE session: {e}")
+
     def discover_documents(self, company: Company) -> List[Dict]:
         """Discover available documents for a company from NSE"""
         documents = []

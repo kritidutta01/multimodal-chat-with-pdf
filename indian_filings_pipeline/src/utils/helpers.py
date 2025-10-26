@@ -9,90 +9,122 @@ from typing import Optional, Dict, List
 from urllib.parse import urlparse
 from slugify import slugify
 
-def generate_filename(company_symbol: str, doc_type: str, period: str, url: str) -> str:
-    """Generate a standardized filename for documents"""
-    
+def generate_filename(company_symbol: str, doc_type: str, period: str, url: str, year: Optional[int] = None) -> str:
+    """Generate a standardized filename for documents
+
+    Args:
+        company_symbol: Company stock symbol
+        doc_type: Type of document (annual_report, quarterly_result, etc.)
+        period: Period string (e.g., FY2024, Q1FY2024)
+        url: Source URL to extract file extension
+        year: Optional year of the document
+
+    Returns:
+        Standardized filename in format: SYMBOL_doctype_FY2024.pdf
+    """
+
     # Clean inputs
     company_symbol = company_symbol.upper()
-    doc_type = slugify(doc_type)
-    period = slugify(period) if period else ""
-    
+    doc_type = slugify(doc_type).replace('-', '_')
+
     # Extract file extension from URL
     parsed_url = urlparse(url)
     path = Path(parsed_url.path)
     extension = path.suffix.lower()
-    
+
     # Default to .pdf if no extension found
-    if not extension or extension not in ['.pdf', '.xls', '.xlsx', '.doc', '.docx']:
+    if not extension or extension not in ['.pdf', '.xls', '.xlsx', '.doc', '.docx', '.ppt', '.pptx']:
         extension = '.pdf'
-    
-    # Generate timestamp for uniqueness
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
-    # Construct filename
+
+    # Build period/year component
+    year_component = ""
     if period:
-        filename = f"{company_symbol}_{doc_type}_{period}_{timestamp}{extension}"
+        # Clean up period string
+        period_clean = slugify(period).replace('-', '_').upper()
+        # Remove redundant prefixes
+        period_clean = re.sub(r'^(FY|Q\d)', lambda m: m.group(0), period_clean, flags=re.IGNORECASE)
+        year_component = period_clean
+    elif year:
+        year_component = f"FY{year}"
+
+    # Construct filename based on available information
+    if year_component:
+        filename = f"{company_symbol}_{doc_type}_{year_component}{extension}"
     else:
+        # If no year info, add timestamp for uniqueness
+        timestamp = datetime.now().strftime("%Y%m%d")
         filename = f"{company_symbol}_{doc_type}_{timestamp}{extension}"
-    
-    # Ensure filename is not too long
-    if len(filename) > 200:
-        # Truncate doc_type and period if too long
-        max_doc_type_len = 50
-        max_period_len = 20
-        
-        doc_type = doc_type[:max_doc_type_len] if len(doc_type) > max_doc_type_len else doc_type
-        period = period[:max_period_len] if len(period) > max_period_len else period
-        
-        if period:
-            filename = f"{company_symbol}_{doc_type}_{period}_{timestamp}{extension}"
+
+    # Ensure filename is not too long (max 255 chars for most filesystems)
+    max_length = 200
+    if len(filename) > max_length:
+        # Calculate available space
+        fixed_parts_len = len(company_symbol) + len(extension) + 2  # 2 for underscores
+        available_len = max_length - fixed_parts_len
+
+        # Truncate doc_type and year_component proportionally
+        max_doc_type_len = min(len(doc_type), available_len // 2)
+        max_year_len = min(len(year_component), available_len - max_doc_type_len - 1)
+
+        doc_type = doc_type[:max_doc_type_len]
+        year_component = year_component[:max_year_len] if year_component else ""
+
+        if year_component:
+            filename = f"{company_symbol}_{doc_type}_{year_component}{extension}"
         else:
-            filename = f"{company_symbol}_{doc_type}_{timestamp}{extension}"
-    
+            filename = f"{company_symbol}_{doc_type}{extension}"
+
     return filename
 
 def extract_year_from_text(text: str) -> Optional[int]:
-    """Extract year from text content"""
+    """Extract year from text content (document titles, URLs, etc.)"""
     if not text:
         return None
-    
-    # Common year patterns
+
+    # Common year patterns - ordered by specificity
     year_patterns = [
-        r'\b(20\d{2})\b',  # 2020, 2021, etc.
-        r'\b(FY\s*20\d{2})\b',  # FY2020, FY 2021
-        r'\b(FY\s*\d{2})\b',  # FY21, FY 22
-        r'\b(\d{4}-\d{2})\b',  # 2020-21
-        r'\b(\d{2}-\d{2})\b',  # 20-21
+        # FY patterns
+        r'FY[_\s-]*(\d{4})[_\s-]*\d{2}',  # FY2023-24, FY2023_24, FY 2023-24
+        r'FY[_\s-]*(\d{4})',  # FY2024, FY_2024, FY 2024
+        r'FY[_\s-]*(\d{2})[_\s-]*\d{2}',  # FY23-24, FY_23_24
+        r'FY[_\s-]*(\d{2})',  # FY24, FY_24, FY 24
+
+        # Year ranges
+        r'(\d{4})[_\s-]+\d{2,4}',  # 2023-24, 2023_24, 2023-2024
+
+        # Annual report patterns
+        r'annual[_\s-]+report[_\s-]+(\d{4})',  # annual-report-2024
+        r'(\d{4})[_\s-]+annual',  # 2024-annual
+        r'AR[_\s-]*(\d{4})',  # AR2024, AR_2024
+
+        # Generic 4-digit years
+        r'\b(20\d{2})\b',  # 2020, 2021, etc. (must be word boundary)
+
+        # 2-digit years (less specific, check last)
+        r'[_\s-](\d{2})[_\s-]',  # _23_, -24-
     ]
-    
+
+    current_year = datetime.now().year
+
     for pattern in year_patterns:
         matches = re.findall(pattern, text, re.IGNORECASE)
         for match in matches:
             try:
-                # Handle different year formats
-                if match.startswith('FY'):
-                    year_str = re.sub(r'[^\d]', '', match)
-                    if len(year_str) == 2:
-                        year = 2000 + int(year_str)
-                    else:
-                        year = int(year_str)
-                elif '-' in match:
-                    # Take the first year from range
-                    year_str = match.split('-')[0]
-                    if len(year_str) == 2:
-                        year = 2000 + int(year_str)
-                    else:
-                        year = int(year_str)
+                year_str = str(match).strip()
+
+                # Convert to 4-digit year
+                if len(year_str) == 2:
+                    year = 2000 + int(year_str)
                 else:
-                    year = int(match)
-                
-                # Validate year range
-                if 2000 <= year <= datetime.now().year + 1:
+                    year = int(year_str)
+
+                # Validate year range (2000 to current year + 1)
+                if 2000 <= year <= current_year + 1:
                     return year
-                    
-            except ValueError:
+
+            except (ValueError, AttributeError):
                 continue
-    
+
     return None
 
 def extract_date_from_text(text: str) -> Optional[datetime]:

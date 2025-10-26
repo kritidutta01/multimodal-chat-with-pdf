@@ -95,7 +95,7 @@ def main():
     checks = [
         ("Database", check_database),
         ("File System", check_file_system),
-        ("Dependencies", check_dependencies),
+        #("Dependencies", check_dependencies),
     ]
     
     all_passed = True

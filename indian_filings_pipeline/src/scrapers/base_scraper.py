@@ -104,7 +104,8 @@ class BaseScraper(ABC):
                 company.symbol,
                 doc_info.get('document_type', 'unknown'),
                 doc_info.get('period', ''),
-                url
+                url,
+                year=doc_info.get('year')
             )
             
             # Get download path
